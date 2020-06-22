@@ -1,48 +1,65 @@
-from airflow import DAG
 from datetime import datetime, timedelta
+# https://towardsdatascience.com/scale-your-data-pipelines-with-airflow-and-kubernetes-4d34b0af045
+from airflow import DAG
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.operators.dummy_operator import DummyOperator
-
-# Original https://kubernetes.io/blog/2018/06/28/airflow-on-kubernetes-part-1-a-different-kind-of-operator/
 
 default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime.utcnow(),
-    'email': ['airflow@example.com'],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5)
+    "owner": "airflow",
+    "depends_on_past": False,
+    "start_date": datetime(2015, 6, 1),
+    "email": ["airflow@airflow.com"],
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5),
 }
 
-dag = DAG(
-    'kubernetes_sample', default_args=default_args, schedule_interval=timedelta(minutes=10))
+example_workflow = DAG('kube-operator',
+                         default_args=default_args,
+                         schedule_interval=timedelta(days=1))
+with example_workflow:
+    t1 = KubernetesPodOperator(namespace='airflow',
+                               image="ubuntu:16.04",
+                               cmds=["bash", "-cx"],
+                               arguments=["echo", "hello world"],
+                               labels={'runner': 'airflow'},
+                               name="pod1",
+                               task_id='pod1',
+                               is_delete_operator_pod=True,
+                               hostnetwork=False,
+                               )
 
+    t2 = KubernetesPodOperator(namespace='airflow',
+                               image="ubuntu:16.04",
+                               cmds=["bash", "-cx"],
+                               arguments=["echo", "hello world"],
+                               labels={'runner': 'airflow'},
+                               name="pod2",
+                               task_id='pod2',
+                               is_delete_operator_pod=True,
+                               hostnetwork=False,
+                               )
 
-start = DummyOperator(task_id='run_this_first', dag=dag)
+    t3 = KubernetesPodOperator(namespace='airflow',
+                               image="ubuntu:16.04",
+                               cmds=["bash", "-cx"],
+                               arguments=["echo", "hello world"],
+                               labels={'runner': 'airflow'},
+                               name="pod3",
+                               task_id='pod3',
+                               is_delete_operator_pod=True,
+                               hostnetwork=False,
+                               )
 
-passing = KubernetesPodOperator(namespace='default',
-                          image="Python:3.6",
-                          cmds=["Python","-c"],
-                          arguments=["print('hello world')"],
-                          labels={"foo": "bar"},
-                          name="passing-test",
-                          task_id="passing-task",
-                          get_logs=True,
-                          dag=dag
-                          )
+    t4 = KubernetesPodOperator(namespace='airflow',
+                               image="ubuntu:16.04",
+                               cmds=["bash", "-cx"],
+                               arguments=["echo", "hello world"],
+                               labels={'runner': 'airflow'},
+                               name="pod4",
+                               task_id='pod4',
+                               is_delete_operator_pod=True,
+                               hostnetwork=False,
+                               )
 
-failing = KubernetesPodOperator(namespace='default',
-                          image="ubuntu:1604",
-                          cmds=["Python","-c"],
-                          arguments=["print('hello world')"],
-                          labels={"foo": "bar"},
-                          name="fail",
-                          task_id="failing-task",
-                          get_logs=True,
-                          dag=dag
-                          )
-
-passing.set_upstream(start)
-failing.set_upstream(start)
+    t1 >> [t2, t3] >> t4
