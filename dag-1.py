@@ -18,7 +18,7 @@ example_workflow = DAG('kube-operator',
                          default_args=default_args,
                          schedule_interval=timedelta(days=1))
 with example_workflow:
-    t1 = KubernetesPodOperator(namespace='airflow',
+    t1 = KubernetesPodOperator(namespace='rancher-datalab',
                                image="ubuntu:16.04",
                                cmds=["bash", "-cx"],
                                arguments=["echo", "hello world"],
@@ -29,7 +29,7 @@ with example_workflow:
                                hostnetwork=False,
                                )
 
-    t2 = KubernetesPodOperator(namespace='airflow',
+    t2 = KubernetesPodOperator(namespace='rancher-datalab',
                                image="ubuntu:16.04",
                                cmds=["bash", "-cx"],
                                arguments=["echo", "hello world"],
@@ -40,7 +40,7 @@ with example_workflow:
                                hostnetwork=False,
                                )
 
-    t3 = KubernetesPodOperator(namespace='airflow',
+    t3 = KubernetesPodOperator(namespace='rancher-datalab',
                                image="ubuntu:16.04",
                                cmds=["bash", "-cx"],
                                arguments=["echo", "hello world"],
@@ -51,7 +51,7 @@ with example_workflow:
                                hostnetwork=False,
                                )
 
-    t4 = KubernetesPodOperator(namespace='airflow',
+    t4 = KubernetesPodOperator(namespace='rancher-datalab',
                                image="ubuntu:16.04",
                                cmds=["bash", "-cx"],
                                arguments=["echo", "hello world"],
